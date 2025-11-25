@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>随机变量与分布函数 - 知识图谱</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #markmap { width: 100%; height: 100%; }
+      .header {
+        position: absolute; top: 0; left: 0; right: 0;
+        background: rgba(255,255,255,0.9);
+        padding: 10px 20px; border-bottom: 1px solid #ddd;
+        z-index: 100; display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .header h1 { margin: 0; font-size: 18px; color: #333; }
+      .legend { font-size: 12px; color: #666; }
+      .legend span { background-color: #e7f5ff; color: #1c7ed6; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+      @media print { .header { display: none; } html, body { height: auto; overflow: visible; } #markmap { height: auto; } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.15.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.15.4/dist/browser/index.min.js"></script>
+  </head>
+  <body>
+    <div class="header">
+      <h1>随机变量与分布函数</h1>
+      <div class="legend">P = PDF页码 例如: <span>P4</span></div>
+    </div>
+    <svg id="markmap"></svg>
+    <script>
+      const markdown = String.raw`
+# 随机变量与分布函数 [P1]
+
+## 1. 随机变量及其分布
+- 基本定义与性质
+  - 随机变量 (可测函数) [P4]
+  - 简单随机变量 & Borel可测函数 [P6, P11]
+  - 随机变量的函数仍为随机变量 [P12]
+  - 分布函数 $F(x) = P(\xi \le x)$ [P14]
+  - 分布函数性质 (单调、右连续、规范性) [P15]
+- 离散型随机变量
+  - 分布列 [P20-21]
+  - Bernoulli, Binomial, Poisson, Hypergeometric, Geometric, Pascal [P23-36]
+- 连续型随机变量
+  - 概率密度函数 $p(x)$ [P37-38]
+  - 均匀 U[a,b], 正态 N($\mu$, $\sigma^2$), 标准正态 N(0,1) [P40-46]
+  - 指数 E($\lambda$) (无记忆性) [P48, P50]
+  - Gamma $\Gamma(r,\lambda)$ 与 Erlang [P52-54]
+- 分布函数的逆与存在性
+  - 分位数与反函数 [P58]
+  - 逆变换采样: $F^{-1}(U) \sim F$ [P63]
+
+## 2. 随机向量与独立性
+- 联合分布与边缘分布
+  - n维随机向量 [P67]
+  - 联合分布函数与边缘分布 [P68]
+  - 离散: 联合分布列/边缘分布列 [P69]
+  - 连续: 联合密度/边缘密度 [P71, P73]
+  - 二维分布函数的性质 [P76]
+- 重要多维分布
+  - Multinomial [P70]
+  - 二维均匀分布 (几何概型) [P74]
+  - n维正态 N($\mu$, $\Sigma$) [P75]
+  - 二维正态: 边缘与相关系数 $\rho$ [P86, P90]
+- 独立性
+  - 相互独立 (分布函数乘积) [P103]
+  - σ代数独立 [P104]
+  - 独立变量的函数仍独立 [P105]
+  - 离散/连续型的独立性判据 [P106-107]
+  - 正态分布独立 $\Leftrightarrow$ 不相关 ($\rho=0$) [P108]
+
+## 3. 随机变量的函数及其分布
+- 一元函数变换
+  - 离散: 直接对应求和 [P113]
+  - 连续: 分布函数微分法 [P114]
+  - 线性变换 (正态仍为正态) [P117]
+  - 平方变换 ($\chi^2$ 的由来) [P120]
+  - 对数正态分布 [P122]
+- 多元变换 (Jacobian 方法)
+  - 一元变换公式 [P123]
+  - 二元变换 (积分变换法) [P146]
+  - 和的分布 (卷积公式) [P134]
+  - 正态分布的可加性 [P136]
+  - 商的分布 [P139]
+  - 多维正态线性变换 [P152]
+- 三大抽样分布与顺序统计量
+  - $\chi^2$ 分布与可加性 [P157-158]
+  - t 分布 (Student's t) [P159]
+  - F 分布 [P162]
+  - 顺序统计量与 Min/Max [P163]
+  - 联合密度与推导 [P166-168]
+`;
+
+      const { Markmap, loadCSS, loadJS, Transformer } = window.markmap;
+      const transformer = new Transformer();
+      const { root, features } = transformer.transform(markdown);
+      if (features.styles) loadCSS(features.styles);
+      if (features.scripts)
+        loadJS(features.scripts, { getMarkmap: () => window.markmap });
+      const params = new URLSearchParams(location.search);
+      const expandLevel = params.has('print') ? 9 : 3;
+      const mm = Markmap.create(
+        "#markmap",
+        { autoFit: true, duration: 500, initialExpandLevel: expandLevel },
+        root
+      );
+      if (params.has('print')) {
+        setTimeout(() => { try { window.print(); } catch (e) {} }, 800);
+      }
+    </script>
+  </body>
+</html>
