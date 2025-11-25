@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>概率极限定理 · 总览</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #markmap { width: 100%; height: 100%; }
+      .header {
+        position: absolute; top: 0; left: 0; right: 0;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px 20px; border-bottom: 1px solid #ddd;
+        z-index: 100; display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .header h1 { margin: 0; font-size: 18px; color: #333; }
+      .legend { font-size: 12px; color: #666; }
+      .legend span { background-color: #e7f5ff; color: #1c7ed6; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+      @media print { .header { display: none; } html, body { height: auto; overflow: visible; } #markmap { height: auto; } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.15.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.15.4/dist/browser/index.min.js"></script>
+  </head>
+  <body>
+    <div class="header">
+      <h1>概率极限定理 · 总览</h1>
+      <div class="legend">打印参数: <span>?print=1</span></div>
+    </div>
+
+    <svg id="markmap"></svg>
+
+    <script>
+      const markdown = String.raw`
+# 处理极限定理的各种工具
+
+## 1. 各种收敛之间的关系
+- $\xi_n \xrightarrow{a.s.} \xi \Rightarrow \xi_n \xrightarrow{P} \xi \Rightarrow \xi_n \xrightarrow{L} \xi$
+- $\xi_n \xrightarrow{P} c \Leftrightarrow \xi_n \xrightarrow{L} c$
+
+## 2. 连续性定理（Helly 第一/第二定理）
+- 若分布函数弱收敛，则特征函数逐点收敛且在任意闭区间一致
+- 若 $f$ 在 $x=0$ 处连续，且特征函数逐点收敛，则分布函数弱收敛
+
+## 3. 中心矩不等式
+- $P(|\xi - E\xi| < \varepsilon) \le \dfrac{E\big[|\xi - E\xi|^p\big]}{\varepsilon^p}$
+
+# 用以上工具证明 WLLN 与古典 CLT（伯努利试验的推广）
+
+## 1. 伯努利试验
+- 伯努利大数定理：若 $\xi \sim B(n,p)$，则 $\lim_{n\to\infty} P\big(|\tfrac{\xi}{n} - p| < \varepsilon\big) = 1$
+- 棣莫弗-拉普拉斯中心极限定理：若 $\xi \sim B(n,p)$，则
+  $\lim_{n\to\infty} P\Big(a < \tfrac{\xi - np}{\sqrt{np(1-p)}} < b\Big) = \Phi(b) - \Phi(a)$
+
+## 2. 独立同分布
+- 辛钦定理：若 $\{\xi_j\}$ 独立同分布，$E\xi_j = \mu$，则 $\tfrac{1}{n} \sum_j \xi_j \xrightarrow{P} \mu$
+- Lindeberg 定理：若 $E\xi_j = \mu$，$D\xi_j = \sigma^2$，则
+  $\tfrac{\sum_j (\xi_j - \mu)}{\sqrt{n}\,\sigma} \xrightarrow{L} X$，且 $X \sim N(0,1)$
+`;
+
+      const { Markmap, loadCSS, loadJS, Transformer } = window.markmap;
+      const transformer = new Transformer();
+      const { root, features } = transformer.transform(markdown);
+      if (features.styles) loadCSS(features.styles);
+      if (features.scripts)
+        loadJS(features.scripts, { getMarkmap: () => window.markmap });
+
+      const params = new URLSearchParams(location.search);
+      const expandLevel = params.has('print') ? 9 : 3;
+      const mm = Markmap.create(
+        "#markmap",
+        { autoFit: true, duration: 500, initialExpandLevel: expandLevel },
+        root
+      );
+      if (params.has('print')) {
+        setTimeout(() => { try { window.print(); } catch (e) {} }, 800);
+      }
+    </script>
+  </body>
+</html>
