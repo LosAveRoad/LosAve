@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>思维导图（可渲染LaTeX） - 新风格</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --accent-3: #f59e0b;
+      --accent-4: #ef4444;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --accent: #60a5fa;
+      --accent-2: #34d399;
+      --accent-3: #fbbf24;
+      --accent-4: #f87171;
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: saturate(180%) blur(6px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    [data-theme="dark"] .header { background: rgba(17,24,39,0.6); }
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .toolbar { display: flex; gap: 8px; }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform .06s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .btn:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .btn:active { transform: translateY(1px); }
+    .container { max-width: 980px; margin: 20px auto; padding: 0 16px; }
+    .legend { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .tree { --spacing: 1.25rem; --radius: 10px; padding-left: 8px; }
+    .tree li { display: block; position: relative; padding-left: calc(2 * var(--spacing) - var(--radius) - 2px); }
+    .tree ul { margin-left: calc(var(--radius) - var(--spacing)); padding-left: 0; }
+    .tree ul li { border-left: 2px solid var(--border); }
+    .tree ul li:last-child { border-color: transparent; }
+    .tree ul li::before { content: ""; display: block; position: absolute; top: calc(var(--spacing) / -2); left: -2px; width: calc(var(--spacing) + 2px); height: calc(var(--spacing) + 1px); border: solid var(--border); border-width: 0 0 2px 2px; }
+    summary { display: block; cursor: pointer; padding: 10px 14px; border-radius: 10px; background-color: var(--card-bg); border: 1px solid var(--border); margin-bottom: 8px; position: relative; z-index: 1; transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+    summary:hover { border-color: var(--accent); }
+    summary::marker, summary::-webkit-details-marker { display: none; }
+    summary:before { content: "+"; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: 8px; border-radius: 4px; background: rgba(37,99,235,0.12); color: var(--accent); font-weight: 700; }
+    details[open] > summary:before { content: "–"; background: rgba(16,185,129,0.12); color: var(--accent-2); }
+    .badge { font-size: 12px; color: var(--muted); margin-left: 8px; background-color: rgba(2,6,23,0.06); padding: 2px 8px; border-radius: 999px; }
+    [data-theme="dark"] .badge { background-color: rgba(255,255,255,0.06); }
+    .note { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; padding-left: 14px; border-left: 2px solid var(--accent); }
+    .level-1 > summary { border-left: 6px solid var(--accent); }
+    .level-2 > summary { border-left: 6px solid var(--accent-2); }
+    .level-3 > summary { border-left: 6px solid var(--accent-3); }
+    .level-4 > summary { border-left: 6px solid var(--accent-4); }
+    .math-display { display: block; padding: 10px 12px; border-radius: 8px; background: rgba(2,6,23,0.04); }
+    [data-theme="dark"] .math-display { background: rgba(255,255,255,0.06); }
+    @media (max-width: 640px) {
+      .container { margin-top: 8px; }
+      .title { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">知识结构图 · 支持 LaTeX</div>
+    <div class="toolbar">
+      <button class="btn" id="expandAll">展开全部</button>
+      <button class="btn" id="collapseAll">折叠全部</button>
+      <button class="btn" id="toggleTheme">切换主题</button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="legend">可使用行内公式如 <span class="math-inline">$E(\xi)$</span>，或块级公式：</div>
+    <div class="math-display">$$\int_{-\infty}^{\infty} p(x)\,dx = 1$$</div>
+    <ul class="tree">
+      <li>
+        <details open class="level-1">
+          <summary>核心主题：数字特征与特征函数<span class="badge">章节汇总</span></summary>
+          <ul>
+            <li>
+              <details class="level-2">
+                <summary>1. 数学期望<span class="badge">P5-14</span></summary>
+                <ul>
+                  <li>
+                    <details class="level-3">
+                      <summary>定义与性质</summary>
+                      <ul>
+                        <li>离散型：$E(g(\xi)) = \sum g(x_k)p_k$</li>
+                        <li>连续型：$E(g(\xi)) = \int g(x)p(x)\,dx$</li>
+                        <li>线性性：$E(a\xi + b) = aE(\xi) + b$</li>
+                        <li class="note">若 $\xi \le \eta$ 则 $E(\xi) \le E(\eta)$</li>
+                      </ul>
+                    </details>
+                  </li>
+                  <li>
+                    <details class="level-3">
+                      <summary>收敛性定理</summary>
+                      <ul>
+                        <li>控制收敛定理</li>
+                        <li>Fatou 引理</li>
+                        <li>单调收敛定理</li>
+                      </ul>
+                    </details>
+                  </li>
+                </ul>
+              </details>
+            </li>
+            <li>
+              <details class="level-2">
+                <summary>2. 方差与相关<span class="badge">P72-110</span></summary>
+                <ul>
+                  <li>
+                    <details class="level-3">
+                      <summary>方差</summary>
+                      <ul>
+                        <li>$D(\xi) = E[(\xi - E\xi)^2]$</li>
+                        <li>$D(\xi) = E(\xi^2) - (E\xi)^2$</li>
+                      </ul>
+                    </details>
+                  </li>
+                  <li>
+                    <details class="level-3">
+                      <summary>相关系数</summary>
+                      <ul>
+                        <li>$\rho = \dfrac{Cov(\xi,\eta)}{\sqrt{D\xi\,D\eta}}$</li>
+                        <li>不相关不等于独立</li>
+                      </ul>
+                    </details>
+                  </li>
+                </ul>
+              </details>
+            </li>
+            <li>
+              <details class="level-2">
+                <summary>3. 特征函数<span class="badge">P153-164</span></summary>
+                <ul>
+                  <li>
+                    <details class="level-3">
+                      <summary>定义与应用</summary>
+                      <ul>
+                        <li>$\varphi(t) = E(e^{i\langle t,\,\xi \rangle})$</li>
+                        <li>独立和对应乘积形式</li>
+                        <li>逆转公式与唯一性</li>
+                      </ul>
+                    </details>
+                  </li>
+                </ul>
+              </details>
+            </li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+  </div>
+  <script>
+    window.MathJax = { tex: { inlineMath: [["$","$"],["\\(","\\)"]], displayMath: [["$$","$$"],["\\[","\\]"]] }, options: { skipHtmlTags: ["script","noscript","style","textarea","pre","code"] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <script>
+    const expandAllBtn = document.getElementById('expandAll');
+    const collapseAllBtn = document.getElementById('collapseAll');
+    const toggleThemeBtn = document.getElementById('toggleTheme');
+    const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+    const setDark = v => document.documentElement.setAttribute('data-theme', v ? 'dark' : 'light');
+    expandAllBtn.onclick = () => { document.querySelectorAll('details').forEach(d => d.open = true); if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(); };
+    collapseAllBtn.onclick = () => { document.querySelectorAll('details').forEach(d => d.open = false); };
+    toggleThemeBtn.onclick = () => { setDark(!isDark()); };
+    document.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => { if (d.open && window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([d]); }));
+  </script>
+</body>
+</html>

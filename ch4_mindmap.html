@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数字特征与特征函数 - 知识图谱</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #markmap {
+        width: 100%;
+        height: 100%;
+      }
+      .header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px 20px;
+        border-bottom: 1px solid #ddd;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 18px;
+        color: #333;
+      }
+      .legend {
+        font-size: 12px;
+        color: #666;
+      }
+      .legend span {
+        background-color: #e7f5ff;
+        color: #1c7ed6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 5px;
+        font-weight: bold;
+      }
+      @media print {
+        .header { display: none; }
+        html, body { height: auto; overflow: visible; }
+        #markmap { height: auto; }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.15.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.15.4/dist/browser/index.min.js"></script>
+  </head>
+  <body>
+    <div class="header">
+      <h1>数字特征与特征函数</h1>
+      <div class="legend">P = PDF页码 例如: <span>P48</span></div>
+    </div>
+
+    <svg id="markmap"></svg>
+
+    <script>
+      const markdown = String.raw`
+# 数字特征与特征函数 [P1]
+
+## 1. 数学期望 (E)
+- 定义
+  - 离散型 (需绝对收敛) [P5-6]
+  - 连续型 (需绝对可积) [P14]
+  - Stieltjes积分定义 [P23, P34]
+- 随机变量函数的期望
+  - 离散型: $E(g(\xi)) = \sum g(x_k)p_k$ [P35]
+  - 连续型: $E(g(\xi)) = \int g(x)p(x)dx$ [P36]
+  - 一般情形与多维情形 [P37, P43]
+- 重要性质 (定理 1.4)
+  - 线性性: $E(a\xi + b) = aE(\xi) + b$ [P48]
+  - 单调性: $\xi \le \eta \Rightarrow E(\xi) \le E(\eta)$ [P48]
+  - 独立性: $E(\xi\eta) = E(\xi)E(\eta)$ [P48]
+  - 命题 1.1: 非负变量 $E(\xi)=0 \Rightarrow P(\xi=0)=1$ [P56]
+  - 命题 1.2: Jensen不等式 [P58]
+- 收敛性定理
+  - 几乎处处收敛 ($a.s.$) [P62]
+  - 有界收敛定理 [P63]
+  - 单调收敛定理 [P65]
+  - Fatou 引理 [P67]
+  - 控制收敛定理 [P69]
+- 常见分布的期望
+  - 二项分布: $np$ [P8]
+  - Poisson: $\lambda$ [P9]
+  - 几何: $1/p$ [P10]
+  - 均匀: $(a+b)/2$ [P16]
+  - 指数: $1/\lambda$ [P18]
+  - 正态: $\mu$ [P20]
+  - Cauchy: 不存在 [P21-22]
+
+## 2. 方差、相关系数与矩
+- 方差 (D)
+  - 定义: $D(\xi) = E[(\xi - E\xi)^2]$ [P72]
+  - 计算: $D(\xi) = E(\xi^2) - (E\xi)^2$ [P74]
+  - 性质: $D(c)=0, D(c\xi)=c^2D(\xi)$ [P87]
+  - 独立和: $D(\sum \xi_i) = \sum D(\xi_i)$ [P87]
+  - 切比雪夫不等式: $P(|\xi-E\xi| \ge \varepsilon) \le D(\xi)/\varepsilon^2$ [P93]
+- 协方差与相关系数 ($\rho$)
+  - $Cov(\xi,\eta) = E[(\xi-E\xi)(\eta-E\eta)]$ [P96]
+  - $\rho = Cov(\xi,\eta) / \sqrt{D\xi D\eta}$ [P98]
+  - $|\rho| \le 1$，等号当且仅当线性相关 [P101]
+  - 不相关 vs 独立 [P104]
+  - 正态分布中，不相关 $\Leftrightarrow$ 独立 [P108-110]
+  - 协方差矩阵 $\Sigma$ (非负定) [P116-117]
+- 矩与分位数
+  - 原点矩与中心矩 [P119]
+  - 分位数与中位数 [P122]
+- 熵 (Entropy)
+  - 离散: $H(p) = -\sum p_i \log p_i$ [P123]
+  - 连续: $H(p) = -\int p(x) \log p(x) dx$ [P127]
+  - 最大熵原理 [P125, P128]
+
+## 3. 条件数学期望
+- 定义
+  - 离散: $E(\eta|\xi=x_i)$ [P131]
+  - 连续: $E(\eta|\xi=x) = \int y\, p_{\eta|\xi}(y|x)\, dy$ [P133]
+  - 一般情形 (投影思想) [P136]
+- 性质 (定理 3.1)
+  - 线性性 [P138]
+  - 提出已知因子: $E(u(\xi)\eta|\xi) = u(\xi)E(\eta|\xi)$ [P138]
+  - 独立性: 若独立，条件期望等于无条件期望 [P138]
+  - 全期望公式: $E[E(\eta|\xi)] = E(\eta)$ [P138]
+- 重要例子
+  - 二维正态分布的条件期望 (线性回归) [P135, P141]
+  - Wald 恒等式 [P143]
+
+## 4. 变换 (母函数与特征函数)
+- 母函数 (PGF)
+  - $g(s) = E(s^\xi)$ [P146]
+  - 与分布列一一对应，导数求矩 [P147]
+  - 独立和: 乘积形式 [P147]
+  - 复合分布: 随机个随机变量之和 [P151]
+- 特征函数 (CF)
+  - $\varphi(t) = E(e^{i\langle t, \xi \rangle})$ [P153]
+  - 线性变换，独立和，求导得矩 [P154]
+  - 非负定性 [P158]
+  - 逆转公式 [P160]
+  - 独立性判定: 乘积形式 [P162]
+  - Riemann-Lebesgue 引理 [P164]
+- 多元正态分布
+  - 联合概率密度定义 [P168]
+  - 参数意义: $\mu$ 为均值, $\Sigma$ 为协方差 [P169]
+  - 特征函数 $\exp\{i\langle t, \mu \rangle - \tfrac{1}{2}t^T\Sigma t\}$ [P171]
+  - 边缘分布与独立性 [P173]
+  - 线性组合仍为正态 [P174]
+
+## 5. Stein 恒等式与方程
+- Stein 恒等式 [P176]
+- Stein 方程与解 [P177]
+- 分布的充要条件 [P178]
+- 指数与正态的 Stein 算子 [P180]
+`;
+
+      const { Markmap, loadCSS, loadJS, Transformer } = window.markmap;
+      const transformer = new Transformer();
+      const { root, features } = transformer.transform(markdown);
+      if (features.styles) loadCSS(features.styles);
+      if (features.scripts)
+        loadJS(features.scripts, { getMarkmap: () => window.markmap });
+      const params = new URLSearchParams(location.search);
+      const expandLevel = params.has('print') ? 9 : 3;
+      const mm = Markmap.create(
+        "#markmap",
+        {
+          autoFit: true,
+          duration: 500,
+          initialExpandLevel: expandLevel,
+        },
+        root
+      );
+      if (params.has('print')) {
+        setTimeout(() => { try { window.print(); } catch (e) {} }, 800);
+      }
+    </script>
+  </body>
+</html>
