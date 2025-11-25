@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ch5_totalview</title>
+    <style>
+      :root { --bg: #f9fafb; --text: #111827; --muted: #6b7280; --card: #ffffff; --border: #e5e7eb; }
+      html, body { height: 100%; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif; }
+      .header { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.7); backdrop-filter: saturate(180%) blur(6px); border-bottom: 1px solid var(--border); padding: 10px 16px; }
+      .title { margin: 0; font-size: 16px; font-weight: 600; }
+      .container { max-width: 920px; margin: 16px auto; padding: 0 16px; }
+      pre#content { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .hint { font-size: 12px; color: var(--muted); margin: 6px 0 0 2px; }
+      @media print { .header { display: none; } .container { margin: 0; } pre#content { border: none; border-radius: 0; } }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1 class="title">ch5_totalview</h1>
+    </div>
+    <div class="container">
+      <div class="hint">以下内容为原文逐字展示</div>
+      <pre id="content"></pre>
+    </div>
+    <script>
+      const raw = String.raw`## 处理极限定理的各种工具 
+ 1. 各种收敛之间的关系 
+ 	 1. $\xi_n \xrightarrow{a.s.} \xi \Rightarrow \xi_n \xrightarrow{P} \xi \Rightarrow \xi_n \xrightarrow{L} \xi$ 
+ 	 2. $\xi_n \xrightarrow{P} c \Leftrightarrow \xi_n \xrightarrow{L} c$ 
+  2. 连续性定理（使用 Helly 第一/第二定理给出证明） 
+ 	 1. 若分布函数弱收敛，则特征函数逐点收敛且在任意闭区间一致 
+ 	 2. 如果 $f$ 在 $x=0$ 处连续，则特征函数逐点收敛可以得到分布函数弱收敛 
+  3. 中心矩不等式 $P(|\xi - E\xi| < \epsilon) \leq \frac {|\xi - E\xi|^p} {\varepsilon^p}$ 
+  
+  用这些工具足以证明弱大数定律和古典中心极限定律（伯努利试验的直接推广）： 
+  1. 伯努利试验情况： 
+ 	 1. 伯努利大数定理：若 $\xi \sim B(n,p)$，则 $\lim_{n\to\infty}P(|\frac {\xi} n - np| < \varepsilon) = 1$ 
+ 	 2. 棣莫弗-拉普拉斯中心极限定理：若 $\xi \sim B(n,p)$，则 $\lim_{n\to\infty}P_n(a<\frac {\xi - np} {\sqrt{n}p(1-p)}<b) = \phi(b) - \phi(a)$ 
+  2. 独立同分布情况： 
+ 	 1. 辛钦定理：若 $\xi_j$ 独立同分布，且 $E\xi_j = \mu$，则 $\frac 1 n \sum_j \xi_j \xrightarrow{P} \mu$ 
+ 	 2. Lindeberg 定理：若 $\xi_j$ 独立同分布，且 $E\xi_j = \mu$，$D\xi_j = \sigma^2$，则 $\frac {\sum_j (\xi_j -\mu)} {\sqrt{n} \sigma} \xrightarrow{L} X$，$X \sim N(0,1)$ 
+  
+  这是我的新文章，写成 ch5_totalview，然后不要改我的原文，用HTML展示即可`;
+      document.getElementById('content').textContent = raw;
+    </script>
+  </body>
+ </html>
