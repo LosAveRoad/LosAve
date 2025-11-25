@@ -15,15 +15,43 @@
   <body>
     <div class="box">
       <h1>个人网站</h1>
-      <p>首页暂空，请访问下列思维导图：</p>
-      <p>
-        <a href="ch3_mindmap.html">ch3 随机变量与分布函数</a> ·
-        <a href="ch4_mindmap.html">ch4 数字特征与特征函数</a> ·
-        <a href="ch5_mindmap.html">ch5 概率极限定理</a>
-      </p>
-      <p>
-        <a href="ch5_totolview.html">ch5 总览（文章）</a>
-      </p>
+      <p>自动识别子页面：</p>
+      <ul id="page-list" style="list-style:none;padding:0;margin:0"></ul>
+      <script>
+        (async () => {
+          const owner = 'LosAveRoad';
+          const repo = 'LosAve';
+          const api = `https://api.github.com/repos/${owner}/${repo}/contents/`;
+          const listEl = document.getElementById('page-list');
+          const add = (name) => {
+            if (name === 'index.html') return;
+            const li = document.createElement('li');
+            li.style.margin = '6px 0';
+            const a = document.createElement('a');
+            a.href = name;
+            a.textContent = name;
+            li.appendChild(a);
+            const print = document.createElement('a');
+            print.href = `${name}?print=1`;
+            print.textContent = '导出PDF';
+            print.style.marginLeft = '8px';
+            li.appendChild(document.createTextNode(' · '));
+            li.appendChild(print);
+            listEl.appendChild(li);
+          };
+          try {
+            const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github+json' } });
+            if (!res.ok) throw new Error('failed');
+            const data = await res.json();
+            const files = data.filter(it => it.type === 'file' && /\.html$/i.test(it.name));
+            files.sort((a, b) => a.name.localeCompare(b.name));
+            listEl.innerHTML = '';
+            files.forEach(it => add(it.name));
+          } catch {
+            ['ch3_mindmap.html','ch4_mindmap.html','ch5_mindmap.html','ch5_totalview.html'].forEach(add);
+          }
+        })();
+      </script>
     </div>
   </body>
 </html>
